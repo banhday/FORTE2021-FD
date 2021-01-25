@@ -1,0 +1,394 @@
+#lang ivy1.7
+
+# We model the failure detector in Figure 10 [1] under partially synchronous constraints 
+# of the DLS computational model [2] in Ivy.   
+#   [1] Chandra, Tushar Deepak, and Sam Toueg. "Unreliable failure detectors for reliable 
+#       distributed systems." Journal of the ACM (JACM) 43.2 (1996): 225-267.   
+#   [2] Dwork, Cynthia, Nancy Lynch, and Larry Stockmeyer. "Consensus in the presence of
+#       partial synchrony." Journal of the ACM (JACM) 35.2 (1988): 288-323.    
+#
+# In this work, we focus on verification of the liveness property called Eventually Strong 
+# Accuracy. In [3], Thanh-Hai et al. proved that the failure detectors of Chandra and Toueg 
+# enjoy the cutoff property. Hence, verification of the liveness property Eventually Strong 
+# Accuracy on the failure detectors of Chandra and Toueg can be done by checking small 
+# instances with only two processes. However, verification of Eventually Strong Accuracy 
+# under partial synchrony needs to solve the following problems:
+#   - Two additional parameters: the unknown bound delta on message delays, and the unknown 
+#     bound phi on the relative speeds of processes.
+#   - The Global Stabilization Time (GST) refers to from when the bounds delta and phi hold.
+#   - The initial value of time out: If time out is initially set to a small value, there
+#     exists an execution where the receiver sometimes has a wrong suspicion of the 
+#     correctness of the sender.
+# In this specification, we assume that GST = 1. We cope with these bounds delta and phi by  
+# by writing a proof with Ivy. In the proof, we provide an inductive invarint on global 
+# transitions where timeout >= 1. This inductive invariant implies that whenever 
+# timeout >= 6 * phi + delta, the following properties hold:
+#   - The receiver receives at least one message from the sender in every time interval
+#     [t, t + timeout].
+#   - The receiver always trusts the sender.
+#   - The time out is unchanged.
+# Hence, this inductive invariant implies the property Eventually Strong Accuracy eventually
+# and forever holds. All invariants in the  inductive invariant are provided in the end of 
+# this specification. Notice that if timeout < 6 * phi + delta, the receiver might have a 
+# wrong suspicion of the correctness the sender.
+#
+# To keep the encoding simple and the reasoning efficient, we assume that one process is 
+# a sender, and another is a receiver, instead of two isomorphic processes under renaming. 
+# In our paper, we prove that the system with one sender and one receiver can simulate the 
+# original system with two isomorphic processes. With this assumption, we need only one 
+# communication channel from the sender to the receiver.
+#
+# We encode this channel is as a relation existsMsgOfAge(X : number) where type number is 
+# interpreted as integers, and X refers to an age of an in-transit message. For every k < delta, 
+# predicate existsMsgOfAge(k) refers to that there exists an in-transit message which is k 
+# time-units old. We assume that a fresh message is 0 time-unit old. Predicate existsMsgOfAge(delta) 
+# has a special meaning and refers to that there exists at least one in-transit message that is 
+# at least delta time-units old. 
+#
+# From now on, messages that are at least delta time-units old are simply called old ones. 
+# The reader can imagine that instead of tracking all old messages, we keep only one old 
+# message, do not increase its age, and throw away other old messages. In our paper, we prove 
+# that this modification preserves three properties Strong Accuracy, Eventually Strong Accuracy 
+# and Strong Completeness.
+#
+# Another way to think of message ages is that we have a bit-vector to represent ages of in-transit 
+# messages. The right-most bit is bit 0. To increase every message age by 1, we first shift-left 
+# all bits in the bit-vector by 1. After the shift-left action, the (delta + 1)-th bit might be 1. 
+# If so, we set the delta-th to 1 and reset the (delta + 1)-th bit to 0. One important thing is 
+# that the shift-left action in our encoding is not in effectively propositional logic (EPR). 
+# The reason is that there exists a quantified variable X such that X is an argument of an 
+# interpreted function + (plus) in our encoding. Hence, to check this specification, the user needs 
+# to use the option “complete=fo”.
+#
+# A relation tmpExistsMsgOfAge(X : number) is a copy of a relation existsMsgOfAge. When we need 
+# to update message ages, we first use tmpExistsMsgOfAge(X) to store the value of existsMsgOfAge(X) 
+# in the next state. Then, we assign tmpExistsMsgOfAge back to existsMsgOfAge. For example, the 
+# reader can see actions shiftLeft and msgBufAfterDelivery.
+#
+# To increase message ages, the action incMsgAge is called. 
+# 
+# Variable sTimer refers to how long the sender has not taken a step. We have the following 
+# invariant: 0 <= sTimer < 3 * phi. In [1], a process has three tasks: Send, Receive, and 
+# Compute. However, in our encoding, the sender only sends new messages. Therefore, the sender 
+# might be inactive in the time interval with (3 ∗ phi − 1) time-units. Predicate sTimer = 0 
+# refers to that the sender is active is the current global transition.
+#
+# Variable rTimer refers to how long the receiver has not taken a step. We have the following
+# invariant: 0 <= rTimer < phi. The constraint rTimer = 0 refers to that the receiver is active
+# is this global transition.
+#
+# Variable sPC refers to what task the sender will execute. Here, the sender can execute only
+# instructions Send which is refered by the location sSnd. Moreover, the sender never crashes. 
+# Hence, we always have sPC = sSnd.
+#
+# Variable rPC refers to what task the receiver will execute. Here, the receiver can execute
+# instructions Send, Receive, and Compute. These instructions are refered to locations rNoSnd,
+# rRcv, and rComp, respectively. Hence, we have an invariant rPC \in {rNoSnd, rRcv, rComp}. 
+# Notice that, the receiver does not actually send anthing. If rPC = rNoSnd, then the receiver 
+# can only increase its waiting time. 
+#
+# In this specification, we do not specify crashes. Hence, we implicitly know that the receiver
+# and the sender are correct by checking invariants sPC = sSnd and rPC \in {rNoSnd, rRcv, rComp}.
+#
+# Variable timeout refers to how long the sender can wait for the receiver. In this specification,
+# timeout is initially set to an arbitrary value that is greater than 0. 
+#
+# Variable waitingTime refers to how long the receiver has waited for the sender. We have
+#       0 <= waitingTime 
+#
+# Variable suspected refers to whether the receiver suspects that the sender is already crashed.
+#
+# Variable constant refers to whether the value of timeout in the current state. It is a ghost 
+# variable to check that timeout is unchanged.
+#
+# With the above assumptions and encoding, we formalize the property Eventually Strong Accuracy 
+# as the following:       
+#       E G (sPC = sSnd /\ rPC \in {rNoSnd, rRcv, rComp}) -> ~suspected
+# where E and G are linear-temporal operators "eventually" and "globally", respectively.
+# With the ghost variable constant, we can verify the property Eventually Strong Accuracy by
+# checking the following invariants:
+#       timeout >= 6 * phi + delta -> ~suspected 
+#       timeout >= 6 * phi + delta -> waitingTime < timeout
+#       constant >= 6 * phi + delta -> timeout = constant
+# The inductive invariant in this specification implies every above invariants.
+
+type number
+
+interpret number -> int
+
+relation existsMsgOfAge(X : number) 
+relation tmpExistsMsgOfAge(X : number)
+
+type loc = {sSnd, rNoSnd, rRcv, rComp}
+
+individual delta : number
+individual phi : number
+
+individual sTimer : number
+individual sPC : loc
+
+individual rTimer : number
+individual rPC : loc
+individual timeout : number
+individual waitingTime : number
+individual suspected : bool
+
+individual constant : number
+
+# Initial steps
+after init {
+    # Let delta and phi be arbitrary such that 0 <= delta & 1 <= phi.
+    delta := *;
+    phi := *;
+    assume 0 <= delta & 1 <= phi;
+
+    # No in-transit messages
+    existsMsgOfAge(X) := false;    
+    tmpExistsMsgOfAge(X) := existsMsgOfAge(X);
+    
+    # The sender's initialization
+    sTimer := 0;
+    sPC := sSnd;
+        
+    # The receiver's initialization
+    rTimer := 0;
+    rPC := rNoSnd;        
+    waitingTime := 0;      
+    suspected := false;   
+
+    timeout := *;
+    assume timeout >= 1;
+    constant := timeout;
+}
+
+# Non-deterministically activate the sender.
+action sSchedule = {
+    if * {
+        sTimer := 0;
+    }
+    else {
+        # The sender cannot be inactive in any time interval with 3 * phi time-units.
+        assume sTimer + 1 < 3 * phi;
+        sTimer := sTimer + 1;
+    };
+}
+
+# Non-deterministically activate the receiver.
+action rSchedule = {   
+    if * {
+        rTimer := 0;
+        if rPC = rNoSnd {
+            rPC := rRcv;
+        }
+        else {
+            if rPC = rRcv {
+                rPC := rComp;
+            }
+            else {
+                rPC := rNoSnd;
+            };
+        };
+    }
+    else {
+        # The receiver cannot be inactive in any time interval with phi time-units.
+        assume rTimer + 1 < phi;
+        rTimer := rTimer + 1;
+    };    
+}
+
+# Non-deterministically activate the sender and the receiver.
+action schedule = {
+    call rSchedule;
+    call sSchedule;    
+}
+
+# Increase the ages of all in-transit messages. New message ages are stored in tmpExistsMsgOfAge.
+# The first assumption refers to that every message age is increased by 1. The second refers to that
+# every message age is in the range [1, delta + 1].
+action shiftLeft  = {
+    tmpExistsMsgOfAge(X) := *;
+    assume forall X : number . (0 <= X & X <= delta) -> tmpExistsMsgOfAge(X + 1) = existsMsgOfAge(X);
+    assume forall X : number . (X <= 0 | X > delta + 1) -> ~tmpExistsMsgOfAge(X);
+}
+
+# First, if there exists a message whose age is (delta + 1) time-units, set existsMsgOfAge(delta) = true.
+# Then, throw away this very-old message.
+action restoreLeftMostBit = {
+    existsMsgOfAge(delta) := existsMsgOfAge(delta) | existsMsgOfAge(delta + 1);
+    existsMsgOfAge(delta + 1) := false;    
+}
+
+# Increase message ages.
+action incMsgAge = {
+    if exists X : number . 0 <= X & X <= delta & existsMsgOfAge(X) {
+        call shiftLeft;
+        existsMsgOfAge(X) := tmpExistsMsgOfAge(X);
+        call restoreLeftMostBit; 
+        tmpExistsMsgOfAge(X) := existsMsgOfAge(X);
+    };
+}
+
+# If the sender is active, then add a new message.
+action sHandle = {
+    if sTimer = 0 {    
+        existsMsgOfAge(0) := true;        
+        tmpExistsMsgOfAge(X) := existsMsgOfAge(X);               
+    };
+}
+
+# The receiver is active in the phase Send. It only increase its waiting time.
+action rNoSndHandle = {    
+    waitingTime := waitingTime + 1;
+}
+
+# Some message will be delivered. This action constructs a message buffer after the delivery.
+action msgBufAfterDelivery = {
+    # The requirement refers to that there exsits at least an in-transit message.
+    require exists X : number . 0 <= X & X <= delta & existsMsgOfAge(X);
+    
+    # A new message buffer is first to store in tmpExistsMsgOfAge. Then, it will be copy back 
+    # to existsMsgOfAge.
+    #   - The 1st assumption implies that only message ages that exist in existsMsgOfAge can 
+    #     exist in tmpExistsMsgOfAge.
+    #   - The 2nd assumption implies that there is no message that is younger than 0 time-units 
+    #     old, or older than delta time-units old.
+    #   - The 3rd assumption implies that there is no old message after the delivery.
+    #   - The 4th assumption implies that at least one message is delivered.
+    tmpExistsMsgOfAge(X) := *;
+    assume forall X : number . (0 <= X & X <= delta) -> 
+                                    (existsMsgOfAge(X) = tmpExistsMsgOfAge(X) | ~tmpExistsMsgOfAge(X));
+    assume forall X : number . (X < 0 | X > delta) -> ~tmpExistsMsgOfAge(X);
+    assume ~tmpExistsMsgOfAge(delta);
+    assume exists X : number . 0 <= X & X <= delta & ~(existsMsgOfAge(X) = tmpExistsMsgOfAge(X));
+
+    # Copy a new message buffer to existsMsgOfAge.
+    existsMsgOfAge(X) := tmpExistsMsgOfAge(X);
+}
+
+# Whenever receiving new messages, the receiver resets its waitingTime to 0.
+# If the receiver suspected the sender before, it trusts the sender again and increases timeout
+# by 1.
+action rcvNewMsg = {
+    waitingTime := 0;
+
+    if suspected {
+        suspected := false;
+        timeout := timeout + 1;
+    };                            
+}
+
+# No message is delivered.
+action rcvNoMsg = {
+    require existsMsgOfAge(delta) = false;    
+    waitingTime := waitingTime + 1;    
+}
+
+# Executes the instruction Receive
+action rRcvHandle = {
+    if rTimer = 0 & rPC = rRcv {
+        if * {
+            assume exists X : number . 0 <= X & X <= delta & existsMsgOfAge(X);
+            call msgBufAfterDelivery;            
+            call rcvNewMsg;        
+        }
+        else {
+            assume existsMsgOfAge(delta) = false;
+            call rcvNoMsg;
+        };
+    };
+}
+
+# Executes the instruction Compute
+action rCompHandle = {    
+    waitingTime := waitingTime + 1;                  
+
+    if waitingTime >= timeout & ~suspected {
+            suspected := true;        
+    };                   
+}
+
+# Handle the receiver's instructions
+action rHandle = {
+    if rTimer = 0 {
+        if rPC = rNoSnd {
+            call rNoSndHandle;
+        };
+        if rPC = rRcv {
+            call rRcvHandle;
+        };
+        if rPC = rComp {
+            call rCompHandle;
+        };
+    };
+}
+
+# Global transtion
+action trans = {   
+    call schedule;     
+    call incMsgAge;
+    call sHandle;
+    call rHandle;    
+}
+
+# Only the global transition is exported.
+export trans
+
+
+# A detailed explanation of the following invariants can be found in our report.
+# Invariants between START and END are grouped and presented in one sub-section in our report.
+# We have 10 groups of invarints:
+#   1)  Type invariants
+#   2)  Strong accuracy
+#   3)  waitingTime, existsMsgOfAge and sTimer
+#   4)  waitingTime and ages of in-transit messages
+#   5)  waitingTime and existing old messages
+#   6)  waitingTime is bound
+#
+# START: Type invariants
+invariant 0 <= delta & 1 <= phi 
+invariant sPC = sSnd
+invariant rPC = rNoSnd | rPC = rRcv | rPC = rComp
+invariant 0 <= sTimer & sTimer < 3 * phi
+invariant 0 <= rTimer & rTimer < phi
+invariant timeout >= 1
+invariant 0 <= waitingTime
+invariant (forall X : number . (X < 0 | delta < X) -> ~existsMsgOfAge(X))
+invariant tmpExistsMsgOfAge(X) = existsMsgOfAge(X)
+# END: Type invariants
+
+# START: Eventually strong accuracy
+invariant timeout >= 6 * phi + delta -> ~suspected 
+
+invariant timeout >= 6 * phi + delta -> waitingTime < timeout
+
+invariant constant >= 6 * phi + delta -> timeout = constant &
+          constant < 6 * phi + delta -> timeout <= 6 * phi + delta
+# END: Eventually strong accuracy
+
+# START: waitingTime, existsMsgOfAge and sTimer
+invariant ((forall X : number . (0 <= X & X <= delta) -> ~existsMsgOfAge(X)) &
+                waitingTime > 0 &
+                waitingTime < 3 * phi) ->
+                    sTimer >= waitingTime
+# END: waitingTime, existsMsgOfAge and sTimer
+
+# START: waitingTime and ages of in-transit messages
+invariant (3 * phi  <= waitingTime & waitingTime < 3 * phi + delta) ->
+                (exists X : number . 0 <= X & waitingTime <= 3 * phi + X & X <= delta & existsMsgOfAge(X))
+# END: waitingTime and ages of in-transit messages
+
+# START: existing old messages
+invariant waitingTime >= 3 * phi + delta -> existsMsgOfAge(delta)
+# END: existing old messages
+
+# START: waitingTime is bound
+invariant (waitingTime >= 5 * phi + delta) ->
+                ((rTimer >= waitingTime - 5 * phi - delta) & (rPC = rNoSnd))
+
+invariant (waitingTime >= 4 * phi + delta & waitingTime < 5 * phi + delta) ->
+                ((rPC = rNoSnd | rPC = rComp) & 
+                 (rPC = rComp -> rTimer >= waitingTime - 4 * phi - delta))
+
+invariant (waitingTime >= 3 * phi + delta & waitingTime < 4 * phi + delta) ->
+                (rPC = rRcv -> rTimer > waitingTime - 3 * phi - delta)
+# END: waitingTime is bound

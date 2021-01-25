@@ -1,0 +1,9 @@
+timeout 2h ../../bin/apalache-mc  check --length=168 MC_sa_cntr_d0p4_wrong.tla > ./res/res_sa_cntr_d0p4_wrong.txt;
+timeout 2h ../../bin/apalache-mc  check --length=168 MC_sa_fnc_d0p4_wrong.tla > ./res/res_sa_fnc_d0p4_wrong.txt;
+timeout 2h ../../bin/apalache-mc  check --length=177 MC_sa_cntr_d2p4_wrong.tla > ./res/res_sa_cntr_d2p4_wrong.txt;
+timeout 2h ../../bin/apalache-mc  check --length=177 MC_sa_fnc_d2p4_wrong.tla > ./res/res_sa_fnc_d2p4_wrong.txt;
+timeout 2h ../../bin/apalache-mc  check --length=184 MC_sa_cntr_d4p4_wrong.tla > ./res/res_sa_cntr_d4p4_wrong.txt;
+timeout 2h ../../bin/apalache-mc  check --length=184 MC_sa_fnc_d4p4_wrong.tla > ./res/res_sa_fnc_d4p4_wrong.txt;
+
+
+

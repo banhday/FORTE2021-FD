@@ -1,0 +1,88 @@
+# Tool home: /home/tran/TUW/apalache/apalache-0.8.1/apalache
+# Package:   /home/tran/TUW/apalache/apalache-0.8.1/apalache/mod-distribution/target/apalache-pkg-0.8.2-SNAPSHOT-full.jar
+# JVM args: -Xmx4096m -DTLA-Library=/home/tran/TUW/apalache/apalache-0.8.1/apalache/src/tla
+#
+# APALACHE version 0.8.2-SNAPSHOT build v0.8.1-2-gf08da1b
+#
+# WARNING: This tool is in the experimental stage.
+#          Please report bugs at: [https://github.com/informalsystems/apalache/issues]
+# 
+# Usage statistics is OFF. We care about your privacy.
+# If you want to help our project, consider enabling statistics with config --enable-stats=true.
+
+Checker options: filename=MC_sa_iinv_cntr_d2p4.tla, init=, next=, inv= I@21:07:20.512
+PASS #0: SanyParser                                               I@21:07:20.927
+Parsing file /home/tran/TUW/apalache/apalache-0.8.1/apalache/fd-test/spec-indinv/MC_sa_iinv_cntr_d2p4.tla
+Parsing file /home/tran/TUW/apalache/apalache-0.8.1/apalache/fd-test/spec-indinv/sa_iinv_cntr_d2.tla
+Parsing file /tmp/Naturals.tla
+PASS #1: ConfigurationPass                                        I@21:07:21.553
+  > MC_sa_iinv_cntr_d2p4.cfg: Loading TLC configuration           I@21:07:21.555
+  > Using the init predicate Init_IndInv_BigStep from the TLC config I@21:07:21.637
+  > Using the next predicate Next from the TLC config             I@21:07:21.637
+  > MC_sa_iinv_cntr_d2p4.cfg: found INVARIANTS: IndInv_BigStep    I@21:07:21.638
+  > Set the initialization predicate to Init_IndInv_BigStep       I@21:07:21.642
+  > Set the transition predicate to Next                          I@21:07:21.642
+  > Set an invariant to IndInv_BigStep                            I@21:07:21.643
+  > Replaced CONSTANT Phi with const_1611134605608390000()        I@21:07:21.645
+PASS #2: UnrollPass                                               I@21:07:21.716
+  > Unroller                                                      I@21:07:21.763
+PASS #3: PrimingPass                                              I@21:07:21.807
+  > Introducing Init_IndInv_BigStepPrimed for Init_IndInv_BigStep' I@21:07:21.812
+PASS #4: CoverAnalysisPass                                        I@21:07:21.858
+PASS #5: InlinePass                                               I@21:07:21.859
+  > InlinerOfUserOper                                             I@21:07:21.866
+  > LetInExpander                                                 I@21:07:21.893
+  > InlinerOfUserOper                                             I@21:07:21.899
+Leaving only relevant operators: CInitPrimed, IndInv_BigStep, Init_IndInv_BigStep, Init_IndInv_BigStepPrimed, Next I@21:07:21.905
+PASS #6: VCGen                                                    I@21:07:21.934
+  > Producing verification conditions from the invariant IndInv_BigStep I@21:07:21.935
+  > VCGen produced 1 verification condition(s)                    I@21:07:21.936
+PASS #7: PreprocessingPass                                        I@21:07:21.966
+  > Before preprocessing: unique renaming                         I@21:07:21.966
+ > Applying standard transformations:                             I@21:07:21.974
+  > Desugarer                                                     I@21:07:21.975
+  > UniqueRenamer                                                 I@21:07:22.017
+  > Normalizer                                                    I@21:07:22.061
+  > Keramelizer                                                   I@21:07:22.094
+  > After preprocessing: UniqueRenamer                            I@21:07:22.161
+PASS #8: TransitionFinderPass                                     I@21:07:22.207
+  > Found 1 initializing transitions                              I@21:07:22.624
+  > Found 51 transitions                                          I@21:07:22.782
+  > No constant initializer                                       I@21:07:22.783
+  > Applying unique renaming                                      I@21:07:22.784
+PASS #9: OptimizationPass                                         I@21:07:22.841
+ > Applying optimizations:                                        I@21:07:22.846
+  > ConstSimplifier                                               I@21:07:22.846
+  > ExprOptimizer                                                 I@21:07:22.875
+  > ConstSimplifier                                               I@21:07:22.888
+PASS #10: AnalysisPass                                            I@21:07:22.951
+ > Marking skolemizable existentials and sets to be expanded...   I@21:07:22.953
+  > SkolemizationMarker                                           I@21:07:22.954
+  > ExpansionMarker                                               I@21:07:22.969
+ > Running analyzers...                                           I@21:07:22.985
+  > Introduced expression grades                                  I@21:07:23.124
+  > Introduced 329 formula hints                                  I@21:07:23.124
+PASS #11: BoundedChecker                                          I@21:07:23.124
+No CONSTANT initializer given                                     I@21:07:23.415
+Step 0, level 0: checking if 1 transition(s) are enabled and violate the invariant I@21:07:23.423
+Step 0, level 1: collecting 1 enabled transition(s)               I@21:07:23.692
+Step 1, level 1: checking if 51 transition(s) are enabled and violate the invariant I@21:07:23.748
+Step 1, level 2: collecting 2 enabled transition(s)               I@21:07:24.116
+Step 2, level 2: checking if 51 transition(s) are enabled and violate the invariant I@21:07:24.128
+Step 2, level 3: collecting 4 enabled transition(s)               I@21:07:24.283
+Step 3, level 3: checking if 51 transition(s) are enabled and violate the invariant I@21:07:24.293
+Step 3, level 4: collecting 3 enabled transition(s)               I@21:07:24.417
+Step 4, level 4: checking if 51 transition(s) are enabled and violate the invariant I@21:07:24.424
+Step 4, level 5: collecting 2 enabled transition(s)               I@21:07:24.572
+Step 5, level 5: checking if 51 transition(s) are enabled and violate the invariant I@21:07:24.581
+Step 5, level 6: collecting 2 enabled transition(s)               I@21:07:24.701
+Step 6, level 6: checking if 51 transition(s) are enabled and violate the invariant I@21:07:24.706
+Step 6, level 7: collecting 16 enabled transition(s)              I@21:07:24.819
+Step 7, level 7: checking if 51 transition(s) are enabled and violate the invariant I@21:07:24.848
+Step 7, level 8: collecting 2 enabled transition(s)               I@21:07:25.087
+The outcome is: NoError                                           I@21:07:25.100
+PASS #12: Terminal                                                I@21:07:25.101
+Checker reports no error up to computation length 7               I@21:07:25.101
+It took me 0 days  0 hours  0 min  4 sec                          I@21:07:25.101
+Total time: 4.595 sec                                             I@21:07:25.101
+EXITCODE: OK

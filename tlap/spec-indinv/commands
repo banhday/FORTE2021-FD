@@ -1,0 +1,26 @@
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sa_iinv_cntr_d2p4.tla > ./length0/res_sa_iinv_cntr_d2p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sa_iinv_cntr_d4p4.tla > ./length0/res_sa_iinv_cntr_d4p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sa_iinv_fnc_d2p4.tla > ./length0/res_sa_iinv_fnc_d2p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sa_iinv_fnc_d4p4.tla > ./length0/res_sa_iinv_fnc_d4p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sa_iinv_cntr_d4p40.tla > ./length0/res_sa_iinv_cntr_d4p40.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sa_iinv_fnc_d4p40.tla > ./length0/res_sa_iinv_fnc_d4p40.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sc_iinv_cntr_d2p4.tla > ./length0/res_sc_iinv_cntr_d2p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sc_iinv_cntr_d2p2.tla > ./length0/res_sc_iinv_cntr_d2p2.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sc_iinv_fnc_d2p4.tla > ./length0/res_sc_iinv_fnc_d2p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sc_iinv_fnc_d2p2.tla > ./length0/res_sc_iinv_fnc_d2p2.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sc_iinv_cntr_d2p40.tla > ./length0/res_sc_iinv_cntr_d2p40.txt;
+timeout 2h ../../bin/apalache-mc  check --length=0 MC_sc_iinv_fnc_d2p40.tla > ./length0/res_sc_iinv_fnc_d2p40.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sa_iinv_cntr_d2p4.tla > ./length7/res_sa_iinv_cntr_d2p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sa_iinv_cntr_d4p4.tla > ./length7/res_sa_iinv_cntr_d4p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sa_iinv_fnc_d2p4.tla > ./length7/res_sa_iinv_fnc_d2p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sa_iinv_fnc_d2p4.tla > ./length7/res_sa_iinv_fnc_d2p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sa_iinv_cntr_d4p40.tla > ./length7/res_sa_iinv_cntr_d4p40.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sa_iinv_fnc_d4p40.tla > ./length7/res_sa_iinv_fnc_d4p40.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sc_iinv_cntr_d2p2.tla > ./length7/res_sc_iinv_cntr_d2p2.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sc_iinv_cntr_d2p4.tla > ./length7/res_sc_iinv_cntr_d2p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sc_iinv_fnc_d2p4.tla > ./length7/res_sc_iinv_fnc_d2p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sc_iinv_fnc_d2p4.tla > ./length7/res_sc_iinv_fnc_d2p4.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sc_iinv_cntr_d2p40.tla > ./length7/res_sc_iinv_cntr_d2p40.txt;
+timeout 2h ../../bin/apalache-mc  check --length=7 --tuning=tuningproperties MC_sc_iinv_fnc_d2p40.tla > ./length7/res_sc_iinv_fnc_d2p40.txt;
+
+
