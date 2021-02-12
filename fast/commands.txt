@@ -1,13 +1,9 @@
-fast --plugin=mona sa_Delta_0.fst
-fast --plugin=mona sa_Delta_0_Phi_1.fst
-fast --plugin=mona sa_Delta_0_Phi_2.fst
-fast --plugin=mona sa_Delta_0_Phi_4.fst
-fast --plugin=mona sa_Delta_0_Phi_4_wrong.fst
-fast --plugin=mona sa_Delta_2.fst
-fast --plugin=mona sa_Delta_2_Phi_4.fst
-fast --plugin=mona sa_Delta_2_Phi_4_wrong.fst
-fast --plugin=mona sa_Delta_4.fst
-fast --plugin=mona sa_Delta_4_Phi_4.fst
-fast --plugin=mona sa_Delta_4_Phi_4_wrong.fst
-fast --plugin=mona sa_Delta_4_Phi_40.fst
-fast --plugin=mona sa_Delta_4_Phi_40_wrong.fst
+fast --plugin=mona sa_Delta_0_bigTO.fst
+fast --plugin=mona sa_Delta_1_bigTO.fst
+fast --plugin=mona sa_Delta_2_bigTO.fst
+fast --plugin=mona sa_Delta_2_Phi_4_bigTO_Regions.fst
+fast --plugin=mona sa_Delta_4_Phi_4__bigTO_Regions.fst
+fast --plugin=mona sa_Delta_4_Phi_5__bigTO_Regions.fst
+fast --plugin=mona sa_Delta_2_Phi_4_smallTO_Regions.fst
+fast --plugin=mona sa_Delta_4_Phi_4__smallTO_Regions.fst
+
